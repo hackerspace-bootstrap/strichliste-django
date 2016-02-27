@@ -7,9 +7,7 @@ from .models import User, Transaction
 
 
 class TransactionValue(ValidationError):
-    @property
-    def detail(self):
-        return [str(self)]
+    pass
 
 
 class TransactionValueZero(TransactionValue):
@@ -20,6 +18,7 @@ class TransactionValueLimit(TransactionValue):
     def __init__(self, value, limit):
         self.value = value
         self.limit = limit
+        TransactionValue.__init__(self, [str(self)])
 
 
 class TransactionValueHigh(TransactionValueLimit):
@@ -37,6 +36,7 @@ class TransactionResultLimit(TransactionValue):
         self.value = value
         self.limit = limit
         self.result = result
+        TransactionValue.__init__(self, [str(self)])
 
 
 class TransactionResultHigh(TransactionResultLimit):
@@ -76,8 +76,12 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise TransactionValueHigh(value, max_transaction)
         elif value < min_transaction:
             raise TransactionValueLow(value, min_transaction)
-        user_id = self.initial_data['user'][0]
-        user = User.objects.get(id=user_id)
+        return value
+
+    def validate(self, transaction):
+        config = settings.APP_CONFIG
+        user = transaction['user']
+        value = transaction['value']
         if user is None:
             raise KeyError
         max_account = config.upper_account_boundary
