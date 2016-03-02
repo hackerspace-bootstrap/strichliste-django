@@ -34,6 +34,32 @@ The a user dictionaries contain the following keys:
 
 POST
 ----
+On this endpoint, the ´POST´ method is used to create a new user. The endpoint supports two parameters:
+
+1. **name** — required, name of the user to be created
+2. **email_address** — required, email address to be associated with the user
+
+The response has the HTTP status code 201 and consists of a dictionary
+containing the following keys:
+
+1. **id** — user id
+2. **name** — user name
+3. **balance** — balance of the user
+4. **last_transaction** — time of the last transaction of the user
+5. **balance** — balance of the created user. (Should always be zero, but this is not guarantied)
+
+Errors
+^^^^^^
+If either **name** or **email_address** are already in the database, a duplicate
+error is raised. The response has the HTTP status code 409.
+
+If either **name** or **email_address** is not provided, an BadRequest error is
+raised. The response has the HTTP status code 400.
+
+.. note::
+    Error messages are not yet determined.
+
+
 
 User Details Endpoint
 =====================
