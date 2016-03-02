@@ -1,14 +1,14 @@
-
+*****************************
 The strichliste API Reference
-=============================
+*****************************
 
 User Endpoint
--------------
+=============
 The user endpoint is located at `/user` and supports both `GET` and `POST`
 methods.
 
 GET
-~~~
+---
 A ´GET´ request returns a list of user. The endpoint supports two parameter:
 
 1. **limit** — optional, limits the number of returned users
@@ -33,16 +33,16 @@ The a user dictionaries contain the following keys:
 4. **last_transaction** — time of the last transaction of the user
 
 POST
-~~~~
+----
 
 User Details Endpoint
----------------------
+=====================
 
 Transaction Endpoint
---------------------
+====================
 
 Metrics Endpoint
-----------------
+================
 
 Settings Endpoint
------------------
+=================
