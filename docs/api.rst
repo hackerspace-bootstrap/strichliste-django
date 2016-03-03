@@ -4,12 +4,12 @@ The strichliste API Reference
 
 User Endpoint
 =============
-The user endpoint is located at `/user` and supports both `GET` and `POST`
+The user endpoint is located at ``/user`` and supports both `GET` and `POST`
 methods.
 
 GET
 ---
-A ´GET´ request returns a list of user. The endpoint supports two parameter:
+A `GET` request returns a list of user. The endpoint supports two parameter:
 
 1. **limit** — optional, limits the number of returned users
 2. **offset** — optional, offset the list of users
@@ -34,7 +34,7 @@ The a user dictionaries contain the following keys:
 
 POST
 ----
-On this endpoint, the ´POST´ method is used to create a new user. The endpoint supports two parameters:
+On this endpoint, the `POST` method is used to create a new user. The endpoint supports two parameters:
 
 1. **name** — required, name of the user to be created
 2. **email_address** — required, email address to be associated with the user
@@ -50,11 +50,9 @@ containing the following keys:
 
 Errors
 ^^^^^^
-If either **name** or **email_address** are already in the database, a duplicate
-error is raised. The response has the HTTP status code 409.
+If either **name** or **email_address** are already in the database, a *409 Conflict* response is returned.
 
-If either **name** or **email_address** is not provided, an BadRequest error is
-raised. The response has the HTTP status code 400.
+If either **name** or **email_address** is not provided, a *400 BadRequest* response is returned.
 
 .. note::
     Error messages are not yet determined.
