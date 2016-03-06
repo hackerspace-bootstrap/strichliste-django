@@ -77,9 +77,9 @@ The response consists of a dictionary containing the following keys:
 
 Errors
 ^^^^^^
-If the **id** is not an integer, a *400 BadRequest* response is returned.
+If the **user_id** is not an integer, a *400 BadRequest* response is returned.
 
-If there is no user with the provided **id** a *404 NotFound* is returned.
+If there is no user with the provided **user_id** a *404 NotFound* is returned.
 
 
 User Transaction Endpoint
@@ -87,13 +87,35 @@ User Transaction Endpoint
 There are two endpoints to retrieve transactions, one global at ``/transaction`` and a user specific one
 at ``/user/$user_id/transaction`` where ``$user_id`` is the numerical id of a user.
 
-The user specific endpoint supports the `GET` and `POST` methods.
+The user specific endpoint is a sub-endpoint of the user detail endpoint and has the same error
+responses. It supports the `GET` and `POST` methods.
 
 GET
 ---
+On this endpoint, the `GET` method is used to retrieve a list of transactions of a specific user.
+The response consist of a dictionary containing the following keys:
+
+1. **limit** — limit transactions in the query
+2. **offset** — offset used in the query
+3. **overall_count** — number of all transactions in the system
+4. **entries** — list of transaction dictionaries
 
 POST
 ----
+On this endpoint, the `POST` method is used to create a new transaction.
+The endpoint supports one parameters:
+
+1. **value** — value of the transaction in the smallest currency unit
+
+Errors
+^^^^^^
+If the **value** is not an integer or zero, a *400 BadRequest* response is returned.
+
+The **value** is boundary checked, if those fail a *409 Forbidden* response is returned.
+
+.. note::
+Error messages are not yet determined.
+
 
 Global Transaction Endpoint
 ===========================
