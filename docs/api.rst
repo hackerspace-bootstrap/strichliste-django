@@ -25,7 +25,7 @@ The response consists of a dictionary containing the following keys:
 3. **overall_count** — number of all users in the system
 4. **entries** — list of user dictionaries
 
-The a user dictionaries contain the following keys:
+The user dictionaries contain the following keys:
 
 1. **id** — user id
 2. **name** — user name
