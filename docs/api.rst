@@ -82,8 +82,42 @@ If the **id** is not an integer, a *400 BadRequest* response is returned.
 If there is no user with the provided **id** a *404 NotFound* is returned.
 
 
-Transaction Endpoint
-====================
+User Transaction Endpoint
+=========================
+There are two endpoints to retrieve transactions, one global at ``/transaction`` and a user specific one
+at ``/user/$user_id/transaction`` where ``$user_id`` is the numerical id of a user.
+
+The user specific endpoint supports the `GET` and `POST` methods.
+
+GET
+---
+
+POST
+----
+
+Global Transaction Endpoint
+===========================
+There are two endpoints to retrieve transactions, one global at ``/transaction`` and a user specific one
+at ``/user/$user_id/transaction`` where ``$user_id`` is the numerical id of a user.
+
+The global endpoint supports only the `GET` method.
+
+GET
+---
+On this endpoint, the `GET` method is used to retrieve a list of transactions of all users.
+The response consist of a dictionary containing the following keys:
+
+1. **limit** — limit transactions in the query
+2. **offset** — offset used in the query
+3. **overall_count** — number of all transactions in the system
+4. **entries** — list of transaction dictionaries
+
+The transaction dictionaries contain the following keys:
+
+1. **id** — transaction id
+2. **user_id** — user id
+3. **value** — value of the transaction in the smallest currency unit
+4. **create_date** — date this transaction was created
 
 Metrics Endpoint
 ================
