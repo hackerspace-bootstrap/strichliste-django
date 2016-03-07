@@ -83,7 +83,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         user = transaction['user']
         value = transaction['value']
         if user is None:
-            raise KeyError
+            raise KeyError("User not found")
         max_account = config.upper_account_boundary
         min_account = config.lower_account_boundary
         new_balance = user.balance + value

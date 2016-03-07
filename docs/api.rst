@@ -111,7 +111,7 @@ Errors
 ^^^^^^
 If the **value** is not an integer or zero, a *400 BadRequest* response is returned.
 
-The **value** is boundary checked, if those fail a *409 Forbidden* response is returned.
+The **value** is boundary checked, if those fail a *403 forbidden* response is returned.
 
 .. note::
 Error messages are not yet determined.
