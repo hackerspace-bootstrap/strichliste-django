@@ -6,19 +6,19 @@ from rest_framework.exceptions import ValidationError
 from .models import User, Transaction
 
 
-class TransactionValue(ValidationError):
+class TransactionValueError(ValidationError):
     pass
 
 
-class TransactionValueZero(TransactionValue):
+class TransactionValueZero(TransactionValueError):
     pass
 
 
-class TransactionValueLimit(TransactionValue):
+class TransactionValueLimit(TransactionValueError):
     def __init__(self, value, limit):
         self.value = value
         self.limit = limit
-        TransactionValue.__init__(self, [str(self)])
+        TransactionValueError.__init__(self, [str(self)])
 
 
 class TransactionValueHigh(TransactionValueLimit):
@@ -31,12 +31,12 @@ class TransactionValueLow(TransactionValueLimit):
         return "transaction value of {} falls below the transaction minimum of {}".format(self.value, self.limit)
 
 
-class TransactionResultLimit(TransactionValue):
+class TransactionResultLimit(TransactionValueError):
     def __init__(self, value, limit, result):
         self.value = value
         self.limit = limit
         self.result = result
-        TransactionValue.__init__(self, [str(self)])
+        TransactionValueError.__init__(self, [str(self)])
 
 
 class TransactionResultHigh(TransactionResultLimit):
