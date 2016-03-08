@@ -91,4 +91,4 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise TransactionResultHigh(value, max_account, new_balance)
         elif new_balance < min_account:
             raise TransactionResultLow(value, min_account, new_balance)
-        return value
+        return transaction
