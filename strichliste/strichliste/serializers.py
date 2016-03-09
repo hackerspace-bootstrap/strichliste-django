@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from .models import User, Transaction
 
 
-class TransactionValueError(ValidationError):
+class TransactionValueError(ValueError):
     pass
 
 
@@ -18,7 +18,6 @@ class TransactionValueLimit(TransactionValueError):
     def __init__(self, value, limit):
         self.value = value
         self.limit = limit
-        TransactionValueError.__init__(self, [str(self)])
 
 
 class TransactionValueHigh(TransactionValueLimit):
@@ -36,7 +35,6 @@ class TransactionResultLimit(TransactionValueError):
         self.value = value
         self.limit = limit
         self.result = result
-        TransactionValueError.__init__(self, [str(self)])
 
 
 class TransactionResultHigh(TransactionResultLimit):
