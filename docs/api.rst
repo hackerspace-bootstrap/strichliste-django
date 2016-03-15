@@ -114,7 +114,7 @@ If the **value** is not an integer or zero, a *400 BadRequest* response is retur
 The **value** is boundary checked, if those fail a *403 forbidden* response is returned.
 
 .. note::
-Error messages are not yet determined.
+    Error messages are not yet determined.
 
 
 Global Transaction Endpoint
