@@ -141,8 +141,29 @@ The transaction dictionaries contain the following keys:
 3. **value** — value of the transaction in the smallest currency unit
 4. **create_date** — date this transaction was created
 
-Metrics Endpoint
-================
+
 
 Settings Endpoint
 =================
+The settings endpoint is located at ``/settings``.
+
+GET
+---
+This endpoint returns currently defined limits on transactions and accounts. It takes no parameters and does not
+return any errors.::
+
+    {
+      boundaries: {
+        transaction: {
+            upper: <int>,
+            lower: <int>},
+        account: {
+            upper: <int>,
+            lower: <int>}
+      }
+    }
+
+All four boundaries are defined as cent values.
+
+Metrics Endpoint
+================
