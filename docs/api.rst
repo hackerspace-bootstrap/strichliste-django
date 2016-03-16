@@ -167,3 +167,28 @@ All four boundaries are defined as cent values.
 
 Metrics Endpoint
 ================
+The metrics endpoint is located at ``/metrics``.
+
+GET
+---
+This endpoint returns statistics about users and recent transactions.
+Per day statistics will be calculated and returned for the last 7 days.::
+
+    {
+      overallBalance: <int>,
+      countTransactions: <int>,
+      contUsers: <int>,
+      avgBalance: <int>,
+      days: [
+        {
+          date: <Date>,
+          overallNumber: <int>,
+          distinctUsers: <int>,
+          dayBalance: <float>,
+          dayBalancePositive: <int>,
+          dayBalanceNegative: <int>
+        }
+      ]
+    }
+
+All balances are given in cents and all averages are rounded to the nearest cent value.
