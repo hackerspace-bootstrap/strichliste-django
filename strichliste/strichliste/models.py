@@ -29,6 +29,11 @@ class Transaction(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     value = models.IntegerField()
 
+    def to_dict(self):
+        return {'id': self.id,
+                'create_date': self.create_date,
+                'value': self.value}
+
     class Meta:
         ordering = ('create_date',)
 

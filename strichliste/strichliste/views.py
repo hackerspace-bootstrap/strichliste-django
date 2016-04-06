@@ -12,6 +12,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
+class UserTransactionViewSet(viewsets.ViewSet):
+    def list(self, request, user_pk=None):
+        user = User.objects.filter(id=user_pk)
+        transactions = Transaction.objects.filter(user=user)
+        return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
+
+
 class TransactionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
