@@ -18,6 +18,12 @@ class UserTransactionViewSet(viewsets.ViewSet):
         transactions = Transaction.objects.filter(user=user)
         return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
 
+    def retrieve(self, request, pk=None, user_pk=None):
+        user = User.objects.filter(id=user_pk)
+        transactions = list(Transaction.objects.filter(user=user, id=pk))
+        assert len(transactions) == 1
+        return Response(data=transactions[0].to_dict())
+
 
 class TransactionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Transaction.objects.all()
