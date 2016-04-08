@@ -26,6 +26,24 @@ class UserTransactionViewSet(viewsets.ViewSet):
         assert len(transactions) == 1
         return Response(data=transactions[0].to_dict())
 
+    @staticmethod
+    def create(request, user_pk=None):
+        value = request.data.get('value')
+        if value is None:
+            return Response(data={'msg': 'Value missing'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = TransactionSerializer(data={'user': user_pk, 'value': value})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except KeyError as e:
+            return Response(data={'msg': e})
+        except TransactionValueZero as e:
+            return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except TransactionValueError as e:
+            return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+
 
 class TransactionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Transaction.objects.all()
