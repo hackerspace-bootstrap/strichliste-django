@@ -13,12 +13,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class UserTransactionViewSet(viewsets.ViewSet):
-    def list(self, request, user_pk=None):
+    @staticmethod
+    def list(request, user_pk=None):
         user = User.objects.filter(id=user_pk)
         transactions = Transaction.objects.filter(user=user)
         return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
 
-    def retrieve(self, request, pk=None, user_pk=None):
+    @staticmethod
+    def retrieve(request, pk=None, user_pk=None):
         user = User.objects.filter(id=user_pk)
         transactions = list(Transaction.objects.filter(user=user, id=pk))
         assert len(transactions) == 1
