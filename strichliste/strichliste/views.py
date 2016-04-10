@@ -13,21 +13,44 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class UserTransactionViewSet(viewsets.ViewSet):
+    """ViewSet for Transactions per User
+
+    The url must provide a primary key for a user.
+    """
     @staticmethod
-    def list(request, user_pk=None):
+    def list(request, user_pk=None) -> Response:
+        """List transactions for a single user
+
+        :param request: Request send from the client
+        :param user_pk: Primary key to identify a user
+        :return: Response
+        """
         user = User.objects.filter(id=user_pk)
         transactions = Transaction.objects.filter(user=user)
         return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
 
     @staticmethod
-    def retrieve(request, pk=None, user_pk=None):
+    def retrieve(request, pk=None, user_pk=None) -> Response:
+        """Retrieve single transaction for a user
+
+        :param request: Request send from the client
+        :param pk: Primary key to identify a transaction
+        :param user_pk: Primary key to identify a user
+        :return: Response
+        """
         user = User.objects.filter(id=user_pk)
         transactions = list(Transaction.objects.filter(user=user, id=pk))
         assert len(transactions) == 1
         return Response(data=transactions[0].to_dict())
 
     @staticmethod
-    def create(request, user_pk=None):
+    def create(request, user_pk=None) -> Response:
+        """Create a new transaction for a user
+
+        :param request: Request send from the client
+        :param user_pk: Primary key to identify a user
+        :return: Response
+        """
         value = request.data.get('value')
         if value is None:
             return Response(data={'msg': 'Value missing'}, status=status.HTTP_400_BAD_REQUEST)
@@ -42,7 +65,6 @@ class UserTransactionViewSet(viewsets.ViewSet):
             return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except TransactionValueError as e:
             return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
-
 
 
 class TransactionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
