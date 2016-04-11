@@ -1,5 +1,5 @@
 from rest_framework import viewsets, mixins, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .serializers import UserSerializer, TransactionSerializer
@@ -26,7 +26,9 @@ class UserTransactionViewSet(viewsets.ViewSet):
         :return: Response
         """
         user = User.objects.filter(id=user_pk)
-        transactions = Transaction.objects.filter(user=user)
+        paginator = LimitOffsetPagination()
+        paginator.default_limit = 100
+        transactions = paginator.paginate_queryset(Transaction.objects.filter(user=user), request)
         return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
 
     @staticmethod
