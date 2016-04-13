@@ -6,7 +6,7 @@ from strichliste.strichliste.views import UserViewSet, UserTransactionViewSet, T
 
 router = routers.DefaultRouter()
 
-router.register('user', UserViewSet)
+router.register('user', UserViewSet, base_name=r'user')
 user_router = NestedSimpleRouter(router, r'user', lookup='user')
 user_router.register(r'transaction', UserTransactionViewSet, base_name=r'user')
 

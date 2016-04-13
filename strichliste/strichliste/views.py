@@ -2,14 +2,33 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from .serializers import UserSerializer, TransactionSerializer
+from .serializers import TransactionSerializer
 from .serializers import TransactionValueZero, TransactionValueError
 from .models import User, Transaction
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.filter(active=True)
-    serializer_class = UserSerializer
+class UserViewSet(viewsets.ViewSet):
+
+    @staticmethod
+    def create(request) -> Response:
+        name = request.data.get('name')
+        mail_address = request.data.get('mail_address')
+        if name is None:
+            return Response(data={'msg': "No name provided"}, status=status.HTTP_400_BAD_REQUEST)
+        user = User(name=name, mail_address=mail_address)
+        user.save()
+        return Response(data=user.to_full_dict())
+
+    @staticmethod
+    def list(request) -> Response:
+        users = User.objects.filter(active=True)
+
+        return Response(data={'entries': [x.to_dict() for x in users]})
+
+    @staticmethod
+    def retrieve(request, pk=None) -> Response:
+        user = User.objects.get(id=pk)
+        return Response(data=user.to_full_dict())
 
 
 class UserTransactionViewSet(viewsets.ViewSet):
