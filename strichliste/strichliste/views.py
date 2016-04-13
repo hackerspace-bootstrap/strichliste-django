@@ -40,10 +40,10 @@ class UserTransactionViewSet(viewsets.ViewSet):
         :param user_pk: Primary key to identify a user
         :return: Response
         """
-        user = User.objects.filter(id=user_pk)
+        user = User.objects.get(id=user_pk)
         transactions = list(Transaction.objects.filter(user=user, id=pk))
         assert len(transactions) == 1
-        return Response(data=transactions[0].to_dict())
+        return Response(data=transactions[0].to_full_dict())
 
     @staticmethod
     def create(request, user_pk=None) -> Response:

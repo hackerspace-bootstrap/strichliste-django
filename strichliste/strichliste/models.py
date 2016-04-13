@@ -19,6 +19,13 @@ class User(models.Model):
     def balance(self):
         return self.transactions.aggregate(sum=Sum('value'))['sum'] or 0
 
+    def to_full_dict(self):
+        return {'id': self.id, 'name': self.name, 'mail_address': self.mail_address,
+                'balance': self.balance, 'last_transaction': self.last_transaction}
+
+    def to_dict(self):
+        return {'id': self.id, 'name': self.name, 'balance': self.balance, 'last_transaction': self.last_transaction}
+
     def __str__(self):
         return self.name
 
