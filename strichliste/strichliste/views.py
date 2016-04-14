@@ -21,9 +21,10 @@ class UserViewSet(viewsets.ViewSet):
 
     @staticmethod
     def list(request) -> Response:
-        users = User.objects.filter(active=True)
-
-        return Response(data={'entries': [x.to_dict() for x in users]})
+        paginator = LimitOffsetPagination()
+        paginator.default_limit = 100
+        users = paginator.paginate_queryset(User.objects.filter(active=True), request)
+        return Response(data={'entries': [x.to_dict() for x in users]}, status=status.HTTP_200_OK)
 
     @staticmethod
     def retrieve(request, pk=None) -> Response:
