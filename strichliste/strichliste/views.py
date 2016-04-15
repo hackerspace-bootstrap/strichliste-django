@@ -8,7 +8,6 @@ from .models import User, Transaction
 
 
 class UserViewSet(viewsets.ViewSet):
-
     @staticmethod
     def create(request) -> Response:
         name = request.data.get('name')
@@ -24,7 +23,10 @@ class UserViewSet(viewsets.ViewSet):
         paginator = LimitOffsetPagination()
         paginator.default_limit = 100
         users = paginator.paginate_queryset(User.objects.filter(active=True), request)
-        return Response(data={'entries': [x.to_dict() for x in users]}, status=status.HTTP_200_OK)
+        return Response(
+            data={'entries': [x.to_dict() for x in users], 'limit': paginator.limit,
+                  'offset': paginator.offset, 'overall_count': paginator.count},
+            status=status.HTTP_200_OK)
 
     @staticmethod
     def retrieve(request, pk=None) -> Response:
@@ -49,7 +51,9 @@ class UserTransactionViewSet(viewsets.ViewSet):
         paginator = LimitOffsetPagination()
         paginator.default_limit = 100
         transactions = paginator.paginate_queryset(Transaction.objects.filter(user=user), request)
-        return Response(data={'transactions': [x.to_dict() for x in transactions]}, status=status.HTTP_200_OK)
+        return Response(data={'transactions': [x.to_dict() for x in transactions], 'limit': paginator.limit,
+                              'offset': paginator.offset, 'overall_count': paginator.count},
+                        status=status.HTTP_200_OK)
 
     @staticmethod
     def retrieve(request, pk=None, user_pk=None) -> Response:
