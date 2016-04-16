@@ -11,12 +11,11 @@ GET
 ---
 A `GET` request returns a list of user. The endpoint supports two parameter:
 
-1. **limit** — optional, limits the number of returned users
-2. **offset** — optional, offset the list of users
+1. **limit** — optional, limits the number of returned users, default limit is 100 elements
+2. **offset** — optional, offsets the list of users
 
-These parameters allow pagination of arbitrary page sizes. A upper limit might be
-imposed in the future. In that case the limit imposed by the server will be returned
-in the corresponding field in the response.
+These parameters allow pagination of arbitrary page sizes. The upper limit is 250 elements
+The response will return the actually used limit.
 
 The response consists of a dictionary containing the following keys:
 

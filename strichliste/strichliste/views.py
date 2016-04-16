@@ -8,8 +8,16 @@ from .models import User, Transaction
 
 
 class UserViewSet(viewsets.ViewSet):
+    """ViewSet for Users
+
+    """
     @staticmethod
     def create(request) -> Response:
+        """Create a user
+
+        :param request: HTTP Request
+        :return: Response
+        """
         name = request.data.get('name')
         mail_address = request.data.get('mail_address')
         if name is None:
@@ -20,7 +28,13 @@ class UserViewSet(viewsets.ViewSet):
 
     @staticmethod
     def list(request) -> Response:
+        """List users
+
+        :param request: HTTP Request
+        :return: Response
+        """
         paginator = LimitOffsetPagination()
+        paginator.max_limit = 250
         paginator.default_limit = 100
         users = paginator.paginate_queryset(User.objects.filter(active=True), request)
         return Response(
@@ -30,6 +44,12 @@ class UserViewSet(viewsets.ViewSet):
 
     @staticmethod
     def retrieve(request, pk=None) -> Response:
+        """Retrieve a user by primary key
+
+        :param request: HTTP Request
+        :param pk: User primary key
+        :return:
+        """
         user = User.objects.get(id=pk)
         return Response(data=user.to_full_dict())
 
