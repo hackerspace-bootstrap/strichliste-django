@@ -10,6 +10,9 @@ from .models import User, Transaction
 class UserViewSet(viewsets.ViewSet):
     """ViewSet for Users
 
+    This ViewSet allows access to and creation of Users.
+    Currently neither authentication nor authorization are supported
+
     """
     @staticmethod
     def create(request) -> Response:
@@ -58,6 +61,9 @@ class UserTransactionViewSet(viewsets.ViewSet):
     """ViewSet for Transactions per User
 
     The url must provide a primary key for a user.
+
+    This ViewSet allows access to and creation of Transaction for a single User.
+    Currently neither authentication nor authorization are supported
     """
     @staticmethod
     def list(request, user_pk=None) -> Response:
