@@ -39,7 +39,8 @@ class Transaction(models.Model):
     def to_dict(self):
         return {'id': self.id,
                 'create_date': self.create_date,
-                'value': self.value}
+                'value': self.value,
+                'user': self.user_id}
 
     class Meta:
         ordering = ('create_date',)
