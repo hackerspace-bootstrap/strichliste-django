@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
@@ -92,7 +92,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         """
         user = User.objects.get(id=user_pk)
         transactions = list(Transaction.objects.filter(user=user, id=pk))
-        assert len(transactions) == 1
+        assert len(transactions) == 1, "Transaction not associated to this user"
         return Response(data=transactions[0].to_full_dict())
 
     @staticmethod
@@ -119,22 +119,31 @@ class UserTransactionViewSet(viewsets.ViewSet):
             return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
 
 
-class TransactionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
+class TransactionViewSet(viewsets.ViewSet):
 
-    def create(self, request, *args, **kwargs):
-        _, _ = args, kwargs
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        except KeyError as e:
-            return Response(data={'msg': e})
-        except TransactionValueZero as e:
-            return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except TransactionValueError as e:
-            return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    @staticmethod
+    def list(request):
+        """List transactions for all users
+
+        :param request: Request send from the client
+        :return: Response
+        """
+        paginator = LimitOffsetPagination()
+        paginator.default_limit = 100
+        transactions = paginator.paginate_queryset(Transaction.objects.all(), request)
+        return Response(data={'transactions': [x.to_dict() for x in transactions], 'limit': paginator.limit,
+                              'offset': paginator.offset, 'overall_count': paginator.count},
+                        status=status.HTTP_200_OK)
+
+    @staticmethod
+    def retrieve(request, pk=None) -> Response:
+        """Retrieve single transaction
+
+        :param request: Request send from the client
+        :param pk: Primary key to identify a transaction
+        :return: Response
+        """
+        transactions = list(Transaction.objects.filter(id=pk))
+        assert len(transactions) == 1, "Private key should identify a single transaction"
+        return Response(data=transactions[0].to_full_dict())
 
