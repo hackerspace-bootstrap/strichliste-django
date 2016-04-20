@@ -92,7 +92,9 @@ class UserTransactionViewSet(viewsets.ViewSet):
         """
         user = User.objects.get(id=user_pk)
         transactions = list(Transaction.objects.filter(user=user, id=pk))
-        assert len(transactions) == 1, "Transaction not associated to this user"
+        if len(transactions) == 0:
+            return Response(data={'msg': 'transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+        assert len(transactions) == 1, "Primary key is not unique"
         return Response(data=transactions[0].to_full_dict())
 
     @staticmethod
