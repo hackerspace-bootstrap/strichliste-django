@@ -146,6 +146,8 @@ class TransactionViewSet(viewsets.ViewSet):
         :return: Response
         """
         transactions = list(Transaction.objects.filter(id=pk))
+        if len(transactions) == 0:
+            return Response(data={'msg': 'transaction not found'}, status=status.HTTP_404_NOT_FOUND)
         assert len(transactions) == 1, "Private key should identify a single transaction"
-        return Response(data=transactions[0].to_full_dict())
+        return Response(data=transactions[0].to_dict())
 
