@@ -53,7 +53,10 @@ class UserViewSet(viewsets.ViewSet):
         :param pk: User primary key
         :return:
         """
-        user = User.objects.get(id=pk)
+        try:
+            user = User.objects.get(id=pk)
+        except User.DoesNotExist:
+            return Response(data={'message': 'user {} not found'.format(pk)}, status=status.HTTP_404_NOT_FOUND)
         return Response(data=user.to_full_dict())
 
 
@@ -73,11 +76,14 @@ class UserTransactionViewSet(viewsets.ViewSet):
         :param user_pk: Primary key to identify a user
         :return: Response
         """
-        user = User.objects.filter(id=user_pk)
+        try:
+            user = User.objects.get(id=user_pk)
+        except User.DoesNotExist:
+            return Response(data={'message': 'user {} not found'.format(user_pk)}, status=status.HTTP_404_NOT_FOUND)
         paginator = LimitOffsetPagination()
         paginator.default_limit = 100
         transactions = paginator.paginate_queryset(Transaction.objects.filter(user=user), request)
-        return Response(data={'transactions': [x.to_dict() for x in transactions], 'limit': paginator.limit,
+        return Response(data={'entries': [x.to_dict() for x in transactions], 'limit': paginator.limit,
                               'offset': paginator.offset, 'overall_count': paginator.count},
                         status=status.HTTP_200_OK)
 
@@ -133,7 +139,7 @@ class TransactionViewSet(viewsets.ViewSet):
         paginator = LimitOffsetPagination()
         paginator.default_limit = 100
         transactions = paginator.paginate_queryset(Transaction.objects.all(), request)
-        return Response(data={'transactions': [x.to_dict() for x in transactions], 'limit': paginator.limit,
+        return Response(data={'entries': [x.to_dict() for x in transactions], 'limit': paginator.limit,
                               'offset': paginator.offset, 'overall_count': paginator.count},
                         status=status.HTTP_200_OK)
 
