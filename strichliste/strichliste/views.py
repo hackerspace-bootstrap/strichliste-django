@@ -128,6 +128,11 @@ class UserTransactionViewSet(viewsets.ViewSet):
 
 
 class TransactionViewSet(viewsets.ViewSet):
+    """ViewSet for Transactions
+
+    This ViewSet allows access to all transactions.
+    Currently neither authentication nor authorization are supported
+    """
 
     @staticmethod
     def list(request):
