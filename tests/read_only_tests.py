@@ -76,3 +76,31 @@ def test_user_limits_max():
     assert transactions['offset'] == 0
     assert transactions['entries'] == []
 
+
+def test_transaction_limits():
+    r = requests.get(''.join(URL + ('transaction',)),
+                     headers=HEADERS,
+                     params={'offset': 1, 'limit': 1})
+    assert r.status_code == 200
+    assert r.headers['Content-Type'] == 'application/json'
+    transactions = json.loads(r.text)
+    assert {'overall_count', 'limit', 'offset', 'entries'}.issubset(transactions)
+    assert transactions['overall_count'] == 0
+    assert transactions['limit'] == 1
+    assert transactions['offset'] == 1
+    assert transactions['entries'] == []
+
+
+def test_transaction_limits_max():
+    r = requests.get(''.join(URL + ('transaction',)),
+                     headers=HEADERS,
+                     params={'offset': 0, 'limit': 1000})
+    assert r.status_code == 200
+    assert r.headers['Content-Type'] == 'application/json'
+    transactions = json.loads(r.text)
+    assert {'overall_count', 'limit', 'offset', 'entries'}.issubset(transactions)
+    assert transactions['overall_count'] == 0
+    assert transactions['limit'] == 250  # 250 is the max
+    assert transactions['offset'] == 0
+    assert transactions['entries'] == []
+

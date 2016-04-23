@@ -81,6 +81,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         except User.DoesNotExist:
             return Response(data={'message': 'user {} not found'.format(user_pk)}, status=status.HTTP_404_NOT_FOUND)
         paginator = LimitOffsetPagination()
+        paginator.max_limit = 250
         paginator.default_limit = 100
         transactions = paginator.paginate_queryset(Transaction.objects.filter(user=user), request)
         return Response(data={'entries': [x.to_dict() for x in transactions], 'limit': paginator.limit,
@@ -142,6 +143,7 @@ class TransactionViewSet(viewsets.ViewSet):
         :return: Response
         """
         paginator = LimitOffsetPagination()
+        paginator.max_limit = 250
         paginator.default_limit = 100
         transactions = paginator.paginate_queryset(Transaction.objects.all(), request)
         return Response(data={'entries': [x.to_dict() for x in transactions], 'limit': paginator.limit,
