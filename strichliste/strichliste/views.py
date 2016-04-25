@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
+from strichliste import settings
 from .serializers import TransactionSerializer
 from .serializers import TransactionValueZero, TransactionValueError
 from .models import User, Transaction
@@ -164,3 +165,27 @@ class TransactionViewSet(viewsets.ViewSet):
         assert len(transactions) == 1, "Private key should identify a single transaction"
         return Response(data=transactions[0].to_dict())
 
+
+class DebugViewSet(viewsets.ViewSet):
+
+    @staticmethod
+    def clear():
+        Transaction.objects.all().delete()
+        User.objects.all().delete()
+        return "All cleared"
+
+    @staticmethod
+    def list(request):
+        if settings.DEBUG:
+            return Response(data={'msg': 'Debug active'})
+        else:
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+    @staticmethod
+    def retrieve(request, pk=None) -> Response:
+        if settings.DEBUG:
+            commands = {'clear': DebugViewSet.clear}
+            res = commands[pk]()
+            return Response(data={'msg': res})
+        else:
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
