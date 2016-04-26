@@ -1,3 +1,4 @@
+import django.db.utils
 from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -27,8 +28,11 @@ class UserViewSet(viewsets.ViewSet):
         if name is None:
             return Response(data={'msg': "No name provided"}, status=status.HTTP_400_BAD_REQUEST)
         user = User(name=name, mail_address=mail_address)
-        user.save()
-        return Response(data=user.to_full_dict())
+        try:
+            user.save()
+        except django.db.utils.IntegrityError:
+            return Response(data={'msg': "user {} already exists".format(name)}, status=status.HTTP_409_CONFLICT)
+        return Response(data=user.to_full_dict(), status=status.HTTP_201_CREATED)
 
     @staticmethod
     def list(request) -> Response:
@@ -189,3 +193,4 @@ class DebugViewSet(viewsets.ViewSet):
             return Response(data={'msg': res})
         else:
             return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
