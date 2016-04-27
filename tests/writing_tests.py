@@ -30,3 +30,27 @@ class WritingTests(unittest.TestCase):
         self.assertEqual(0, result['balance'])
         self.assertEqual(None, result['last_transaction'])
 
+    def test_02_create_user_fail_duplicate(self):
+        # Fail to create user with duplicate name
+        params = {'name': 'gert', 'mail_address': 'gertMail'}
+        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
+        self.assertEqual(201, r.status_code, msg=r.text)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+
+        result = json.loads(r.text)
+        self.assertTrue({'id',
+                         'name',
+                         'mail_address',
+                         'balance',
+                         'last_transaction'}.issubset(result))
+        self.assertEqual('gert', result['name'])
+        self.assertEqual(int, type(result['id']))
+        self.assertEqual(0, result['balance'])
+        self.assertEqual(None, result['last_transaction'])
+        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
+        self.assertEqual(409, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        self.assertTrue('msg' in result)
+        self.assertEqual("user gert already exists", result['msg'])
+
