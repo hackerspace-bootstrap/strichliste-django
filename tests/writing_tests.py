@@ -54,3 +54,26 @@ class WritingTests(unittest.TestCase):
         self.assertTrue('msg' in result)
         self.assertEqual("user gert already exists", result['msg'])
 
+    def test_03_empty_user_transaction_list(self):
+        # Show empty transactions list
+        params = {'name': 'gert', 'mail_address': 'gertMail'}
+        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
+        self.assertEqual(201, r.status_code, msg=r.text)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+
+        result = json.loads(r.text)
+        self.assertTrue({'id',
+                         'name',
+                         'mail_address',
+                         'balance',
+                         'last_transaction'}.issubset(result))
+        self.assertEqual('gert', result['name'])
+        self.assertEqual(int, type(result['id']))
+        self.assertEqual(0, result['balance'])
+        self.assertEqual(None, result['last_transaction'])
+        r = requests.get(''.join((URL + ('user', '/', str(result['id']), '/', 'transaction',))), headers=HEADERS)
+        self.assertEqual(200, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        transactions = json.loads(r.text)
+        self.assertTrue({'overall_count', 'limit', 'offset', 'entries'}.issubset(transactions))
+        self.assertEqual({'overall_count': 0, 'limit': 100, 'offset': 0, 'entries': []}, transactions)
