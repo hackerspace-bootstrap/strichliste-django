@@ -100,8 +100,35 @@ class WritingTests(unittest.TestCase):
                           headers=HEADERS,
                           data=json.dumps(params))
         self.assertEqual(400, r.status_code)
-        assert r.headers['Content-Type'] == 'application/json'
+        self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        assert 'value' in result
-        assert result['value'] == ['A valid integer is required.']
+        self.assertTrue('value' in result)
+        self.assertTrue(['A valid integer is required.'], result['value'])
+
+    def test_05_create_transaction_fail_zero(self):
+        # Fail to create transaction when value is zero
+        params = {'name': 'gert', 'mail_address': 'gertMail'}
+        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
+        self.assertEqual(201, r.status_code, msg=r.text)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+
+        result = json.loads(r.text)
+        self.assertTrue({'id',
+                         'name',
+                         'mail_address',
+                         'balance',
+                         'last_transaction'}.issubset(result))
+        self.assertEqual('gert', result['name'])
+        self.assertEqual(int, type(result['id']))
+        self.assertEqual(0, result['balance'])
+        self.assertEqual(None, result['last_transaction'])
+        params = {'value': 0}
+        r = requests.post(''.join((URL + ('user', '/', str(result['id']), '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data=json.dumps(params))
+        self.assertEqual(400, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        print(result)
+        self.assertTrue('value must not be zero', result.get('msg'))
 
