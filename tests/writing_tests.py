@@ -1,3 +1,4 @@
+import datetime
 import json
 import unittest
 
@@ -132,3 +133,25 @@ class WritingTests(unittest.TestCase):
         print(result)
         self.assertTrue('value must not be zero', result.get('msg'))
 
+    def test_06_create_transaction_1(self):
+        # Create transaction
+        params = {'name': 'gert', 'mail_address': 'gertMail'}
+        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
+        self.assertEqual(201, r.status_code, msg=r.text)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+
+        user = json.loads(r.text)
+        params = {'value': 1100}
+        r = requests.post(''.join((URL + ('user', '/', str(user['id']), '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data=json.dumps(params))
+        now = datetime.datetime.utcnow()
+        self.assertEqual(201, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        self.assertTrue({'id', 'user', 'create_date', 'value'}.issubset(result), msg=str(result))
+        self.assertEqual(user['id'], result['user'])
+        self.assertEqual(1100, result['value'])
+        # TODO This assumes Z timezone a.k.a. UTC. Should be handled and parsed properly
+        create_date = datetime.datetime.strptime(result['create_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        self.assertGreater(20, (now - create_date).total_seconds())
