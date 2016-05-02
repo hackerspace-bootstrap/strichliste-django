@@ -9,7 +9,7 @@ URL = ("http://", "127.0.0.1", ":", "8000", "/")
 HEADERS = {'Content-Type': 'application/json'}
 
 
-class WritingTests(unittest.TestCase):
+class UserCreationTests(unittest.TestCase):
     def setUp(self):
         requests.get(''.join(URL + ('debug/clear/',)))
 
@@ -79,25 +79,21 @@ class WritingTests(unittest.TestCase):
         self.assertTrue({'overall_count', 'limit', 'offset', 'entries'}.issubset(transactions))
         self.assertEqual({'overall_count': 0, 'limit': 100, 'offset': 0, 'entries': []}, transactions)
 
-    def test_04_create_transaction_fail_nan(self):
-        # Fail to create transaction when value is not a number
+
+class TransactionCreationTests(unittest.TestCase):
+    def setUp(self):
+        requests.get(''.join(URL + ('debug/clear/',)))
         params = {'name': 'gert', 'mail_address': 'gertMail'}
         r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
         self.assertEqual(201, r.status_code, msg=r.text)
         self.assertEqual('application/json', r.headers['Content-Type'])
-
         result = json.loads(r.text)
-        self.assertTrue({'id',
-                         'name',
-                         'mail_address',
-                         'balance',
-                         'last_transaction'}.issubset(result))
-        self.assertEqual('gert', result['name'])
-        self.assertEqual(int, type(result['id']))
-        self.assertEqual(0, result['balance'])
-        self.assertEqual(None, result['last_transaction'])
+        self.user = str(result['id'])
+
+    def test_04_create_transaction_fail_nan(self):
+        # Fail to create transaction when value is not a number
         params = {'value': 'foo'}
-        r = requests.post(''.join((URL + ('user', '/', str(result['id']), '/', 'transaction', '/'))),
+        r = requests.post(''.join((URL + ('user', '/', self.user, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data=json.dumps(params))
         self.assertEqual(400, r.status_code)
@@ -108,41 +104,19 @@ class WritingTests(unittest.TestCase):
 
     def test_05_create_transaction_fail_zero(self):
         # Fail to create transaction when value is zero
-        params = {'name': 'gert', 'mail_address': 'gertMail'}
-        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
-        self.assertEqual(201, r.status_code, msg=r.text)
-        self.assertEqual('application/json', r.headers['Content-Type'])
-
-        result = json.loads(r.text)
-        self.assertTrue({'id',
-                         'name',
-                         'mail_address',
-                         'balance',
-                         'last_transaction'}.issubset(result))
-        self.assertEqual('gert', result['name'])
-        self.assertEqual(int, type(result['id']))
-        self.assertEqual(0, result['balance'])
-        self.assertEqual(None, result['last_transaction'])
         params = {'value': 0}
-        r = requests.post(''.join((URL + ('user', '/', str(result['id']), '/', 'transaction', '/'))),
+        r = requests.post(''.join((URL + ('user', '/', self.user, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data=json.dumps(params))
         self.assertEqual(400, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        print(result)
         self.assertTrue('value must not be zero', result.get('msg'))
 
     def test_06_create_transaction_1(self):
         # Create transaction
-        params = {'name': 'gert', 'mail_address': 'gertMail'}
-        r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
-        self.assertEqual(201, r.status_code, msg=r.text)
-        self.assertEqual('application/json', r.headers['Content-Type'])
-
-        user = json.loads(r.text)
         params = {'value': 1100}
-        r = requests.post(''.join((URL + ('user', '/', str(user['id']), '/', 'transaction', '/'))),
+        r = requests.post(''.join((URL + ('user', '/', self.user, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data=json.dumps(params))
         now = datetime.datetime.utcnow()
@@ -150,8 +124,36 @@ class WritingTests(unittest.TestCase):
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
         self.assertTrue({'id', 'user', 'create_date', 'value'}.issubset(result), msg=str(result))
-        self.assertEqual(user['id'], result['user'])
+        self.assertEqual(self.user, str(result['user']))
         self.assertEqual(1100, result['value'])
         # TODO This assumes Z timezone a.k.a. UTC. Should be handled and parsed properly
         create_date = datetime.datetime.strptime(result['create_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         self.assertGreater(20, (now - create_date).total_seconds())
+
+        params = {'value': 1201}
+        r = requests.post(''.join((URL + ('user', '/', self.user, '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data=json.dumps(params))
+        now = datetime.datetime.utcnow()
+        self.assertEqual(201, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        self.assertTrue({'id', 'user', 'create_date', 'value'}.issubset(result), msg=str(result))
+        self.assertEqual(self.user, str(result['user']))
+        self.assertEqual(1201, result['value'])
+        # TODO This assumes Z timezone a.k.a. UTC. Should be handled and parsed properly
+        create_date = datetime.datetime.strptime(result['create_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        self.assertGreater(20, (now - create_date).total_seconds())
+        self.assert_user(self.user, [1100, 1201])
+
+    def assert_user(self, user_id, transactions=tuple()):
+        r = requests.get(''.join(URL + ('user', '/', user_id, '/')), headers=HEADERS)
+        self.assertEqual(200, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+
+        user = json.loads(r.text)
+        self.assertTrue({'mail_address', 'name', 'id', 'balance', 'last_transaction'}.issubset(user))
+        self.assertEqual(user_id, str(user['id']))
+        self.assertEqual(sum(transactions), user['balance'])
+        self.assertIsNotNone(user['last_transaction'])
+
