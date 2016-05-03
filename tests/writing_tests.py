@@ -144,7 +144,19 @@ class TransactionCreationTests(unittest.TestCase):
         # TODO This assumes Z timezone a.k.a. UTC. Should be handled and parsed properly
         create_date = datetime.datetime.strptime(result['create_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         self.assertGreater(20, (now - create_date).total_seconds())
-        self.assert_user(self.user, [1100, 1201])
+        self.assert_user(self.user, (1100, 1201))
+
+    def test_12_invalid_json(self):
+        # Fail to create transaction with 403 (lower account boundary)
+        r = requests.post(''.join((URL + ('user', '/', '1', '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data='{"name":}')
+        print(r.text)
+        self.assertEqual(400, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        self.assertIn('detail', result)
+        self.assertIn("JSON parse error", result['detail'])
 
     def assert_user(self, user_id, transactions=tuple()):
         r = requests.get(''.join(URL + ('user', '/', user_id, '/')), headers=HEADERS)
