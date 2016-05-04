@@ -61,7 +61,7 @@ class UserViewSet(viewsets.ViewSet):
         try:
             user = User.objects.get(id=pk)
         except User.DoesNotExist:
-            return Response(data={'message': 'user {} not found'.format(pk)}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data={'msg': 'user {} not found'.format(pk)}, status=status.HTTP_404_NOT_FOUND)
         return Response(data=user.to_full_dict())
 
 
@@ -84,7 +84,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         try:
             user = User.objects.get(id=user_pk)
         except User.DoesNotExist:
-            return Response(data={'message': 'user {} not found'.format(user_pk)}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data={'msg': 'user {} not found'.format(user_pk)}, status=status.HTTP_404_NOT_FOUND)
         paginator = LimitOffsetPagination()
         paginator.max_limit = 250
         paginator.default_limit = 100

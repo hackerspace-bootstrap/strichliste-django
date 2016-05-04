@@ -218,4 +218,3 @@ class TransactionCreationTests(unittest.TestCase):
         self.assertEqual(user_id, str(user['id']))
         self.assertEqual(sum(transactions), user['balance'])
         self.assertIsNotNone(user['last_transaction'])
-
