@@ -107,7 +107,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         if len(transactions) == 0:
             return Response(data={'msg': 'transaction not found'}, status=status.HTTP_404_NOT_FOUND)
         assert len(transactions) == 1, "Primary key is not unique"
-        return Response(data=transactions[0].to_full_dict())
+        return Response(data=transactions[0].to_dict())
 
     @staticmethod
     def create(request, user_pk=None) -> Response:
