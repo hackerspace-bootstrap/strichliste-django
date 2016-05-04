@@ -17,7 +17,7 @@ class UserCreationTests(unittest.TestCase):
         # Create user
         params = {'name': 'gert', 'mailAddress': 'gertMail'}
         r = requests.post(''.join(URL + ('user/',)), headers=HEADERS, data=json.dumps(params))
-        self.assertEqual(201, r.status_code, msg=r.text)
+        self.assertEqual(201, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
 
         result = json.loads(r.text)
@@ -201,7 +201,6 @@ class TransactionCreationTests(unittest.TestCase):
         r = requests.post(''.join((URL + ('user', '/', self.user, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data='{"name":}')
-        print(r.text)
         self.assertEqual(400, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
