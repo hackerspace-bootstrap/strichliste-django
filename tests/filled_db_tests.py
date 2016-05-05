@@ -157,6 +157,34 @@ class FilledTransactionsTests(unittest.TestCase):
                     self.assertEqual(user_id, entry['user'])
                     self.assert_user_transaction(entry['id'], entry['value'], user_id)
 
+    def test_load_transactions_offset(self):
+        r = requests.get(''.join(URL + ('transaction',)), headers=HEADERS,
+                         params={'limit': 1, 'offset': 2})
+        self.assertEqual(200, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        transactions = json.loads(r.text)
+        total_count = sum([len(x) for x in self.transactions.values()])
+        self.assertEqual(total_count, transactions.get('overall_count'))
+        self.assertEqual(1, transactions.get('limit'))
+        self.assertEqual(2, transactions.get('offset'))
+        self.assertIsInstance(transactions['entries'], list)
+        entries = transactions['entries']
+        self.assertEqual(1, len(entries))
+        for j, entry in enumerate(entries):
+            user_id = entry['user']
+            self.assertIn(entry['value'], self.transactions.get(user_id))
+
+    def test_load_single_transaction(self):
+        r = requests.get(''.join(URL + ('transaction',)), headers=HEADERS)
+        self.assertEqual(200, r.status_code)
+        transactions = json.loads(r.text)
+        entries = transactions['entries']
+        for j, entry in enumerate(entries):
+            with self.subTest(transaction_id=entry['id']):
+                user_id = entry['user']
+                self.assertIn(entry['value'], self.transactions.get(user_id))
+                self.assert_user_transaction(entry['id'], entry['value'], user_id)
+
     def assert_user_transaction(self, transaction_id, value, user_id):
         r = requests.get(
             ''.join(URL + ('user', '/', str(user_id), '/', 'transaction', '/', str(transaction_id))),
