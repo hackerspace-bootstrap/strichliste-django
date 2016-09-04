@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from logging.handlers import SysLogHandler
+
 from strichliste import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -107,6 +109,63 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+# Logging configuration
+
+loglevel = 'DEBUG' if DEBUG else 'INFO'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+        'syslog': {
+            'format': 'strichliste.%(name)s %(levelname)s - %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+        'syslog': {
+            'level': loglevel,
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'syslog',
+            'facility': SysLogHandler.LOG_LOCAL6,
+            'address': '/dev/log'
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'syslog'],
+            'level': loglevel,
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console', 'syslog'],
+            'level': loglevel,
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'syslog'],
+            'level': loglevel,
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['console'],
+            'level': loglevel,
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    }
+}
 
 # App configuration
 
