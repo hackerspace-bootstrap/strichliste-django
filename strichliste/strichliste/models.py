@@ -7,6 +7,7 @@ class User(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
     mail_address = models.EmailField(null=True)
+    balance = models.IntegerField(default=0)
 
     @property
     def last_transaction(self):
@@ -16,7 +17,7 @@ class User(models.Model):
             return None
 
     @property
-    def balance(self):
+    def _balance(self):
         return self.transactions.aggregate(sum=Sum('value'))['sum'] or 0
 
     def to_full_dict(self):
