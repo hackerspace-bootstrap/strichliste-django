@@ -126,7 +126,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except KeyError as e:
-            return Response(data={'msg': e})
+            return Response(data={'msg': e}, status=status.HTTP_404_NOT_FOUND)
         except TransactionValueZero as e:
             return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except TransactionValueError as e:
