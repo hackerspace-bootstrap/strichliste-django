@@ -185,6 +185,11 @@ class DebugViewSet(viewsets.ViewSet):
         return "All cleared"
 
     @staticmethod
+    def check_balance():
+        result = [user.balance == user.calc_balance() for user in User.objects.all()]
+        return 'Everything matches' if all(result) else 'Differences detected'
+
+    @staticmethod
     def list(request):
         if settings.DEBUG:
             return Response(data={'msg': 'Debug active'})
@@ -194,7 +199,8 @@ class DebugViewSet(viewsets.ViewSet):
     @staticmethod
     def retrieve(request, pk=None) -> Response:
         if settings.DEBUG:
-            commands = {'clear': DebugViewSet.clear}
+            commands = {'clear': DebugViewSet.clear,
+                        'check_balance': DebugViewSet.check_balance}
             res = commands[pk]()
             return Response(data={'msg': res})
         else:
