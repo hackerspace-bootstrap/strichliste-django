@@ -16,8 +16,16 @@ class User(models.Model):
         except AttributeError:
             return None
 
-    @property
-    def _balance(self):
+    def calc_balance(self):
+        """This calculates the balance of the user from its transaction
+
+        During normal usage only the balance attribute should be used, this function
+        only exists to check the calculation.
+
+        This operation might be slow but does not have any side effects.
+
+        :return: Calculated balance
+        """
         return self.transactions.aggregate(sum=Sum('value'))['sum'] or 0
 
     def to_full_dict(self):
