@@ -111,7 +111,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         return Response(data=transactions[0].to_dict())
 
     @staticmethod
-    @transaction.atomic()
+    @transaction.atomic
     def create(request, user_pk=None) -> Response:
         """Create a new transaction for a user
 
