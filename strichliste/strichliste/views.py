@@ -1,4 +1,5 @@
 import django.db.utils
+from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -110,6 +111,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
         return Response(data=transactions[0].to_dict())
 
     @staticmethod
+    @transaction.atomic
     def create(request, user_pk=None) -> Response:
         """Create a new transaction for a user
 
@@ -122,8 +124,12 @@ class UserTransactionViewSet(viewsets.ViewSet):
             return Response(data={'msg': 'Value missing'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer = TransactionSerializer(data={'user': user_pk, 'value': value})
+            user = User.objects.get(pk=user_pk)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            user.balance += value
+            user.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except KeyError as e:
             return Response(data={'msg': e}, status=status.HTTP_404_NOT_FOUND)
@@ -179,6 +185,11 @@ class DebugViewSet(viewsets.ViewSet):
         return "All cleared"
 
     @staticmethod
+    def check_balance():
+        result = [user.balance == user.calc_balance() for user in User.objects.all()]
+        return 'Everything matches' if all(result) else 'Differences detected'
+
+    @staticmethod
     def list(request):
         if settings.DEBUG:
             return Response(data={'msg': 'Debug active'})
@@ -188,7 +199,8 @@ class DebugViewSet(viewsets.ViewSet):
     @staticmethod
     def retrieve(request, pk=None) -> Response:
         if settings.DEBUG:
-            commands = {'clear': DebugViewSet.clear}
+            commands = {'clear': DebugViewSet.clear,
+                        'check_balance': DebugViewSet.check_balance}
             res = commands[pk]()
             return Response(data={'msg': res})
         else:

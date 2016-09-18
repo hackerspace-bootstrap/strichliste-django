@@ -7,6 +7,7 @@ class User(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
     mail_address = models.EmailField(null=True)
+    balance = models.IntegerField(default=0)
 
     @property
     def last_transaction(self):
@@ -15,8 +16,16 @@ class User(models.Model):
         except AttributeError:
             return None
 
-    @property
-    def balance(self):
+    def calc_balance(self):
+        """This calculates the balance of the user from its transaction
+
+        During normal usage only the balance attribute should be used, this function
+        only exists to check the calculation.
+
+        This operation might be slow but does not have any side effects.
+
+        :return: Calculated balance
+        """
         return self.transactions.aggregate(sum=Sum('value'))['sum'] or 0
 
     def to_full_dict(self):
