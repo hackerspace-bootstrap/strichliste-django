@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from strichliste import settings
 from .serializers import TransactionSerializer
-from .serializers import TransactionValueZero, TransactionValueError
+from .serializers import TransactionValueZero, TransactionValueError, UserNotFound
 from .models import User, Transaction
 
 
@@ -122,21 +122,62 @@ class UserTransactionViewSet(viewsets.ViewSet):
         value = request.data.get('value')
         if value is None:
             return Response(data={'msg': 'Value missing'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            serializer = TransactionSerializer(data={'user': user_pk, 'value': value})
-            user = User.objects.get(pk=user_pk)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            user.balance += value
-            user.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except KeyError as e:
-            return Response(data={'msg': e}, status=status.HTTP_404_NOT_FOUND)
-        except TransactionValueZero as e:
-            return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except TransactionValueError as e:
-            return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        target_account_id = request.data.get('dst')
+        if target_account_id is None:
+            try:
+                serializer = TransactionSerializer(data={'user': user_pk, 'value': value})
+                user = User.objects.get(pk=user_pk)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                user.balance += value
+                user.save()
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except UserNotFound as e:
+                return Response(data={'msg': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            except TransactionValueZero as e:
+                return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except TransactionValueError as e:
+                return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            try:
+                dst_account = User.objects.get(pk=target_account_id)
+                src_account = User.objects.get(pk=user_pk)
+            except UserNotFound as e:
+                transaction.rollback()
+                return Response(data={'msg': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+            try:
+                return UserTransactionViewSet.create_double_entry_transactions(src_account, dst_account, value)
+            except TransactionValueZero as e:
+                transaction.rollback()
+                return Response(data={'msg': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except TransactionValueError as e:
+                transaction.rollback()
+                return Response(data={'msg': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+    @staticmethod
+    def create_double_entry_transactions(src_account, dst_account, value):
+        # Create and validate transactions
+        serializer_1 = TransactionSerializer(data={'user': src_account.id, 'value': value})
+        serializer_1.is_valid(raise_exception=True)
+        serializer_2 = TransactionSerializer(data={'user': dst_account.id, 'value': -value})
+        serializer_2.is_valid(raise_exception=True)
+
+        # Store the transactions
+        serializer_1.save()
+        serializer_2.save(double_entry_id=serializer_1.instance.id)
+        serializer_1.instance.double_entry_id = serializer_2.instance.id
+        serializer_1.instance.save()
+
+        # Update the account balances
+        src_account.balance += value
+        src_account.save()
+        dst_account.balance += -value
+        dst_account.save()
+
+        return Response(serializer_1.data, status=status.HTTP_201_CREATED)
 
 
 class TransactionViewSet(viewsets.ViewSet):

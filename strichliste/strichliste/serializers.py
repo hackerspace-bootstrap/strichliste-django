@@ -53,6 +53,14 @@ class TransactionResultLow(TransactionResultLimit):
                                                                               limit=self.limit)
 
 
+class UserNotFound(KeyError):
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+    def __str__(self):
+        return "user {user_id} not found".format(user_id=self.user_id)
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
