@@ -62,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ('id', 'user', 'value', 'create_date')
+        fields = ('id', 'user', 'value', 'create_date', 'double_entry')
 
     def validate_value(self, value):
         config = settings.APP_CONFIG

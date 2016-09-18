@@ -44,6 +44,7 @@ class Transaction(models.Model):
                              on_delete=models.PROTECT, db_index=True)
     create_date = models.DateTimeField(auto_now_add=True)
     value = models.IntegerField()
+    double_entry = models.ForeignKey('Transaction', on_delete=models.PROTECT, null=True)
 
     def to_dict(self):
         return {'id': self.id,
