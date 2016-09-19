@@ -146,7 +146,7 @@ LOGGING = {
         },
         'django': {
             'handlers': ['console', 'syslog'],
-            'level': loglevel,
+            'level': 'INFO',
             'propagate': True,
         },
         'django.request': {
