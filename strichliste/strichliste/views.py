@@ -144,7 +144,7 @@ class UserTransactionViewSet(viewsets.ViewSet):
 
     @staticmethod
     def create_single_entry_transaction(user_id, value):
-        with transaction.atomic:
+        with transaction.atomic():
             serializer = TransactionSerializer(data={'user': user_id, 'value': value})
             user = User.objects.get(pk=user_id)
             serializer.is_valid(raise_exception=True)
