@@ -102,9 +102,13 @@ The response consist of a dictionary containing the following keys:
 POST
 ----
 On this endpoint, the `POST` method is used to create a new transaction.
-The endpoint supports one parameters:
+The endpoint supports one mandatory and one optional parameter:
 
 1. **value** — value of the transaction in the smallest currency unit
+2. **dst** - (optional) ID of an account to transfer funds to
+
+If the **dst** parameter is provided any funds removed from the first account are added the destination account
+and vice versa.
 
 Errors
 ^^^^^^
