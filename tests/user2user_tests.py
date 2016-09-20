@@ -84,28 +84,42 @@ class U2UTransactionCreationTests(unittest.TestCase):
 
     def test_08_create_transaction_fail_lower_account_boundary(self):
         # Fail to create transaction with 403 (lower account boundary)
-        params = {'value': -10000, 'dst': self.user_b}
+        params = {'value': -5000}
+        for _ in range(4):
+            r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
+                              headers=HEADERS,
+                              data=json.dumps(params))
+            self.assertEqual(201, r.status_code)
+
+        params = {'value': -5000, 'dst': self.user_b}
         r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data=json.dumps(params))
         self.assertEqual(403, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        expected_message = "transaction value of -10000 leads to an overall account balance " \
-                           "of -10000 which goes below the lower account limit of -2300"
+        expected_message = "transaction value of -5000 leads to an overall account balance " \
+                           "of -25000 which goes below the lower account limit of -23000"
         self.assertEqual(expected_message, result.get('msg'))
 
     def test_09_create_transaction_fail_upper_account_boundary(self):
         # Fail to create transaction with 403 (lower account boundary)
-        params = {'value': 10000, 'dst': self.user_b}
+        params = {'value': 5000}
+        for _ in range(8):
+            r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
+                              headers=HEADERS,
+                              data=json.dumps(params))
+            self.assertEqual(201, r.status_code)
+
+        params = {'value': 5000, 'dst': self.user_b}
         r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
                           headers=HEADERS,
                           data=json.dumps(params))
         self.assertEqual(403, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        expected_message = "transaction value of 10000 leads to an overall account balance of 10000 " \
-                           "which goes beyond the upper account limit of 4200"
+        expected_message = "transaction value of 5000 leads to an overall account balance of 45000 " \
+                           "which goes beyond the upper account limit of 42000"
         self.assertEqual(expected_message, result.get('msg'))
 
     def test_10_create_transaction_fail_lower_transaction_boundary(self):
@@ -117,7 +131,7 @@ class U2UTransactionCreationTests(unittest.TestCase):
         self.assertEqual(403, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        expected_message = "transaction value of -9999999 falls below the transaction minimum of -999900"
+        expected_message = "transaction value of -9999999 falls below the transaction minimum of -5000"
         self.assertEqual(expected_message, result.get('msg'))
 
     def test_11_create_transaction_fail_upper_transaction_boundary(self):
@@ -129,10 +143,60 @@ class U2UTransactionCreationTests(unittest.TestCase):
         self.assertEqual(403, r.status_code)
         self.assertEqual('application/json', r.headers['Content-Type'])
         result = json.loads(r.text)
-        expected_message = "transaction value of 9999999 exceeds the transaction maximum of 999900"
+        expected_message = "transaction value of 9999999 exceeds the transaction maximum of 5000"
         self.assertEqual(expected_message, result.get('msg'))
 
-    def test_12_invalid_json(self):
+    def test_12_create_transaction_fail_lower_account_boundary(self):
+        # Fail to create transaction with 403 (lower account boundary)
+        params = {'value': -5000}
+        for _ in range(4):
+            r = requests.post(''.join((URL + ('user', '/', self.user_b, '/', 'transaction', '/'))),
+                              headers=HEADERS,
+                              data=json.dumps(params))
+            self.assertEqual(201, r.status_code)
+
+        params = {'value': +5000, 'dst': self.user_b}
+        r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data=json.dumps(params))
+        self.assertEqual(403, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        expected_message = "transaction value of -5000 leads to an overall account balance " \
+                           "of -25000 which goes below the lower account limit of -23000"
+        self.assertEqual(expected_message, result.get('msg'))
+
+    def test_13_create_transaction_fail_upper_account_boundary(self):
+        # Fail to create transaction with 403 (lower account boundary)
+        params = {'value': 5000}
+        for _ in range(8):
+            r = requests.post(''.join((URL + ('user', '/', self.user_b, '/', 'transaction', '/'))),
+                              headers=HEADERS,
+                              data=json.dumps(params))
+            self.assertEqual(201, r.status_code)
+
+        params = {'value': -5000, 'dst': self.user_b}
+        r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
+                          headers=HEADERS,
+                          data=json.dumps(params))
+        self.assertEqual(403, r.status_code)
+        self.assertEqual('application/json', r.headers['Content-Type'])
+        result = json.loads(r.text)
+        expected_message = "transaction value of 5000 leads to an overall account balance of 45000 " \
+                           "which goes beyond the upper account limit of 42000"
+        self.assertEqual(expected_message, result.get('msg'))
+
+    def test_14_create_transaction_fail_lower_transaction_boundary(self):
+        # Fail to create transaction with 403 (lower account boundary)
+        # Can't properly test this, because the limit on account a triggers first
+        pass
+
+    def test_15_create_transaction_fail_upper_transaction_boundary(self):
+        # Fail to create transaction with 403 (lower account boundary)
+        # Can't properly test this, because the limit on account a triggers first
+        pass
+
+    def test_16_invalid_json(self):
         # Fail to create transaction with 403 (lower account boundary)
         r = requests.post(''.join((URL + ('user', '/', self.user_a, '/', 'transaction', '/'))),
                           headers=HEADERS,
